@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python .claude/skills/redhat-news/news_monitor.py:*)",
+      "Bash(python .claude/skills/log/log.py:*)",
+      "Bash(python news_retriever.py:*)"
+    ]
+  }
+}

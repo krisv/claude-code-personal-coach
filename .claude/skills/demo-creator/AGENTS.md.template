@@ -1,0 +1,133 @@
+# {AGENT_NAME} Agent
+
+{AGENT_DESCRIPTION}
+
+## Agent Name
+
+**{AGENT_NAME}** - Use this exact name for logging and memory operations.
+
+## Scenario
+
+{SCENARIO_DESCRIPTION}
+
+## Core Context Files
+
+The agent maintains context files in the `data/` folder:
+
+{DATA_STRUCTURE}
+
+## Session-Based Logging
+
+**CRITICAL:** All operations MUST use session-based logging.
+
+### Capture Session ID
+
+When you run `news_retriever.py`, capture the session_id from the JSON output:
+
+```json
+{
+  "status": "success",
+  "session_id": "20260422-144502",
+  ...
+}
+```
+
+**Use this session_id for ALL subsequent logging in that interaction.**
+
+### Log Your Work
+
+Use the log.py command-line tool with the session_id from news retrieval.
+
+**Log thinking steps:**
+```bash
+python .claude/skills/log/log.py --session-id SESSION_ID --thinking "Analyzing news updates..." --agent-name "{AGENT_NAME}"
+```
+
+**Log file updates:**
+```bash
+python .claude/skills/log/log.py --session-id SESSION_ID --tool-call "Write data/..." --result "Updated X" --agent-name "{AGENT_NAME}"
+```
+
+## Instructions
+
+### When Asked: "Process new updates" or "Get latest updates"
+
+**Workflow:**
+
+1. **Fetch updates** using news_retriever.py
+   ```bash
+   python news_retriever.py
+   ```
+   **CRITICAL:** Capture the `session_id` from JSON output - use it for ALL logging.
+
+2. **Read current context**
+   ```bash
+   python .claude/skills/log/log.py --session-id SESSION_ID --thinking "Reading current context files" --agent-name "{AGENT_NAME}"
+   ```
+   {CONTEXT_FILES_TO_READ}
+
+3. **Analyze updates**
+   ```bash
+   python .claude/skills/log/log.py --session-id SESSION_ID --thinking "Analyzing new updates for: {ANALYSIS_FOCUS}" --agent-name "{AGENT_NAME}"
+   ```
+
+   For each news item:
+   {UPDATE_PROCESSING_RULES}
+
+4. **Update context files as needed**
+   ```bash
+   python .claude/skills/log/log.py --session-id SESSION_ID --thinking "Updating context files with new information" --agent-name "{AGENT_NAME}"
+   ```
+
+   {UPDATE_RULES}
+
+5. **Generate overview**
+
+   After processing updates, create a summary showing:
+   {OVERVIEW_CONTENT}
+
+   Present this overview to the user in a clear, structured format.
+
+6. **Identify recommended actions**
+
+   Based on the updates and current context, suggest:
+   {ACTION_RECOMMENDATIONS}
+
+7. **Update memory** with latest article ID
+   ```bash
+   python news_retriever.py --update-memory MOST_RECENT_ARTICLE_ID --session-id SESSION_ID
+   ```
+
+### Optional: Post Comments on Updates
+
+```bash
+python news_retriever.py --post-comment ARTICLE_ID 'Comment text' --session-id SESSION_ID
+```
+
+**⚠️ IMPORTANT - Shell Escaping:**
+When comment text contains dollar signs (`$1000`, `$variable`, etc.), use **single quotes** to prevent bash variable expansion:
+
+```bash
+# ❌ WRONG - bash interprets $1000 as a variable (likely empty)
+python news_retriever.py --post-comment ARTICLE_ID "This costs $1000" --session-id SESSION_ID
+
+# ✅ CORRECT - Use single quotes to prevent expansion
+python news_retriever.py --post-comment ARTICLE_ID 'This costs $1000' --session-id SESSION_ID
+
+# ✅ ALSO CORRECT - Escape the dollar sign in double quotes
+python news_retriever.py --post-comment ARTICLE_ID "This costs \$1000" --session-id SESSION_ID
+```
+
+**Best practice:** Use single quotes for comment text with special characters (`$`, `%`, `!`, etc.).
+
+## Processing Guidelines
+
+{PROCESSING_GUIDELINES}
+
+## Notes
+
+- **Structured updates:** Extract meaningful information from news items
+- **Stay grounded:** Only update context files when warranted
+- **Always log:** Use session_id from news retrieval for all operations
+- **Always update memory:** End every update session by saving latest article ID
+- **Show progress:** Always generate overview after processing updates
